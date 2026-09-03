@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System Health · Space Weather Sentinel</title>
+  <link rel="stylesheet" href="styles.css?v=9" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="glow"></div>
+  <main class="shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Operations Dashboard</p>
+        <h1>System Health</h1>
+        <p class="sub">Model artifacts, data feeds, and API endpoints status in real time.</p>
+      </div>
+      <div class="status-card">
+        <div class="status-row">
+          <div class="pulse"></div>
+          <span id="healthOverall">--</span>
+        </div>
+        <p class="status-note" id="healthTimestamp">--</p>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+          <span class="theme-dot"></span>
+          <span id="themeLabel">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Service Summary</h2>
+          <p>Uptime, error rate, and request health.</p>
+        </div>
+        <button id="healthRefreshBtn">Refresh</button>
+      </div>
+      <div class="health-grid">
+        <article class="health-card">
+          <div class="health-title">Uptime</div>
+          <div class="health-value" id="healthUptime">--</div>
+          <div class="health-meta">seconds</div>
+        </article>
+        <article class="health-card">
+          <div class="health-title">Error Rate</div>
+          <div class="health-value" id="healthErrorRate">--</div>
+          <div class="health-meta">last hour</div>
+        </article>
+        <article class="health-card">
+          <div class="health-title">Requests</div>
+          <div class="health-value" id="healthRequests">--</div>
+          <div class="health-meta">total</div>
+        </article>
+        <article class="health-card">
+          <div class="health-title">Last Error</div>
+          <div class="health-value health-small" id="healthLastError">--</div>
+          <div class="health-meta">most recent</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Model Artifacts</h2>
+          <p id="modelDirNote">--</p>
+        </div>
+        <span class="chart-value" id="modelSummary">--</span>
+      </div>
+      <div class="health-table" id="modelList"></div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Data Feeds</h2>
+          <p id="dataDirNote">--</p>
+        </div>
+        <span class="chart-value" id="dataSummary">--</span>
+      </div>
+      <div class="health-table" id="dataList"></div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>API Endpoints</h2>
+          <p>Live checks against the backend APIs.</p>
+        </div>
+        <span class="chart-value" id="apiSummary">--</span>
+      </div>
+      <div class="health-table" id="apiList"></div>
+    </section>
+  </main>
+
+  <script src="health.js?v=1"></script>
+</body>
+</html>

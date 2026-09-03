@@ -1,0 +1,6 @@
+data
+logs
+models
+models_sgd
+__pycache__
+*.pyc

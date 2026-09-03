@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kp / Dst / SYM-H</title>
+  <link rel="stylesheet" href="detail.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="header">
+    <a href="/">← Back to dashboard</a>
+    <button class="toggle" id="themeToggle">Toggle theme</button>
+  </div>
+  <section class="hero">
+    <div class="panel">
+      <h1>Kp / Dst / SYM-H</h1>
+      <p class="meta">Storm indices for Earth impacts and satellite risk.</p>
+      <div class="grid" style="margin-top:16px;">
+        <div class="card">
+          <h3>Geospace Indices (1 day)</h3>
+          <img src="https://services.swpc.noaa.gov/images/geospace/geospace_1_day.png" alt="Geospace indices" />
+        </div>
+        <div class="card">
+          <h3>Planetary Kp</h3>
+          <img src="https://services.swpc.noaa.gov/images/planetary-k-index.png" alt="Kp index" />
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  </script>
+</body>
+</html>

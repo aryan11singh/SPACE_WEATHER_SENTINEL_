@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Weather Sentinel — Mission Control</title>
+  <link rel="stylesheet" href="styles.css?v=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="glow"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">SW</div>
+      <div class="nav-list">
+        <button class="nav-item active" type="button" aria-label="Overview">◎</button>
+        <button class="nav-item" type="button" aria-label="Forecast">◌</button>
+        <button class="nav-item" type="button" aria-label="Satellites">◇</button>
+        <button class="nav-item" type="button" aria-label="Alerts">⚑</button>
+        <button class="nav-item" type="button" aria-label="Settings">⚙</button>
+      </div>
+      <button class="nav-item" id="themeToggle" type="button" aria-label="Toggle theme">◐</button>
+      <div class="pill" id="themeLabel">Dark</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <span>🔎</span>
+          <input type="text" placeholder="Search mission, storm, satellite..." aria-label="Search mission" />
+        </div>
+        <div class="top-actions">
+          <span class="pill">Last update <span id="lastUpdate">--</span></span>
+          <span class="pill">Data age <span id="dataAge">--</span></span>
+          <span class="status-pill"><span class="pulse" id="statusPulse"></span><span id="statusText">Awaiting data</span></span>
+          <button class="button" id="refreshBtn" type="button">Update</button>
+        </div>
+      </header>
+
+      <section class="hero-grid">
+        <article class="card hero-card">
+          <div class="hero-header">
+            <div>
+              <h3>Space Weather Overview</h3>
+              <p class="card-sub">Live geomagnetic risk, upstream solar wind, and 15‑minute storm window.</p>
+            </div>
+            <span class="badge" id="kpPill">Kp --</span>
+          </div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Storm Risk</div>
+              <div class="metric-value" id="stormValue">--</div>
+              <div class="metric-unit">Probability</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">SYM/H +15</div>
+              <div class="metric-value" id="symhValue">--</div>
+              <div class="metric-unit" id="symhTrend">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Kp Index</div>
+              <div class="metric-value" id="kpValue">--</div>
+              <div class="metric-unit" id="kpTime">--</div>
+            </div>
+          </div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Bz GSM</div>
+              <div class="metric-value" id="bzValue">--</div>
+              <div class="metric-unit" id="bzBadge">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Solar Wind Speed</div>
+              <div class="metric-value" id="speedValue">--</div>
+              <div class="metric-unit" id="speedBadge">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Density</div>
+              <div class="metric-value" id="densityValue">--</div>
+              <div class="metric-unit">cm⁻³</div>
+            </div>
+          </div>
+          <div class="note">Timestamp <span id="timeStamp">--</span></div>
+          <div class="gauge" id="stormGauge">
+            <div class="bar-fill" id="stormBar"></div>
+          </div>
+          <div class="bar">
+            <div class="bar-fill" id="kpBar"></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h3>Today’s Highlights</h3>
+          </div>
+          <div class="highlight-grid">
+            <div class="highlight-card">
+              <div class="metric-label">Flare Risk (M/X)</div>
+              <div class="metric-value" id="flareValue">--</div>
+              <div class="metric-unit" id="flareClass">Class --</div>
+              <div class="metric-unit" id="flareFlux">Flux --</div>
+              <div class="note" id="flareNote">--</div>
+            </div>
+            <div class="highlight-card">
+              <div class="metric-label">SEP Risk</div>
+              <div class="metric-value" id="sepLevel">--</div>
+              <div class="metric-unit" id="sepFlux">-- pfu</div>
+              <div class="metric-unit" id="sepEnergy">--</div>
+              <div class="note" id="sepNote">--</div>
+            </div>
+            <div class="highlight-card">
+              <div class="metric-label">Drag Proxy</div>
+              <div class="metric-value" id="dragValue">--</div>
+              <div class="metric-unit" id="dragLevel">--</div>
+              <div class="note" id="dragNote">--</div>
+            </div>
+            <div class="highlight-card">
+              <div class="metric-label">Satellite Impact</div>
+              <div class="metric-value" id="satImpactValue">--</div>
+              <div class="metric-unit" id="satImpactLevel">--</div>
+              <div class="note" id="satImpactNote">--</div>
+            </div>
+            <div class="highlight-card">
+              <div class="metric-label">Solar Cycle</div>
+              <div class="metric-value" id="solarCyclePhase">--</div>
+              <div class="metric-unit" id="solarCycleLabel">Phase --</div>
+              <div class="note">F10.7 <span id="solarCycleF107">--</span> • SSN <span id="solarCycleSsn">--</span></div>
+              <div class="bar"><div class="bar-fill" id="solarCycleBar"></div></div>
+              <div class="note">Month <span id="solarCycleTime">--</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="card span-7">
+          <div class="card-header">
+            <h3>Recent Conditions</h3>
+            <div class="range">SYM/H <span id="symLast">--</span> • Bz <span id="bzLast">--</span> • Speed <span id="speedLast">--</span></div>
+          </div>
+          <div class="stack">
+            <div class="canvas-wrap"><canvas id="chartSym"></canvas></div>
+            <div class="canvas-wrap"><canvas id="chartBz"></canvas></div>
+            <div class="canvas-wrap"><canvas id="chartSpeed"></canvas></div>
+          </div>
+        </article>
+
+        <article class="card span-5" id="alertPanel">
+          <div class="card-header">
+            <h3>Operational Alert</h3>
+            <span class="badge" id="alertBadge">NORMAL</span>
+          </div>
+          <p class="alert-title" id="alertTitle">Systems nominal</p>
+          <p class="card-sub" id="alertMessage">Awaiting storm threshold updates.</p>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Storm Risk</div>
+              <div class="metric-value" id="alertStorm">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">SYM/H +15</div>
+              <div class="metric-value" id="alertSymh">--</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card span-12">
+          <div class="card-header">
+            <h3>Dst Forecast vs Observed</h3>
+            <div class="range">
+              Range
+              <select id="dstRange">
+                <option value="24">Last 24h</option>
+                <option value="168" selected>Last 7d</option>
+                <option value="720">Last 30d</option>
+              </select>
+              <button class="button" id="dstRefreshBtn" type="button">Update</button>
+            </div>
+          </div>
+          <div class="canvas-wrap"><canvas id="chartDstCompare"></canvas></div>
+          <div class="note">Latest Dst <span id="dstLast">--</span></div>
+        </article>
+
+        <article class="card span-6">
+          <div class="card-header">
+            <h3>Dst Forecast (Next 72h)</h3>
+            <span class="pill" id="dstFutureSource">--</span>
+          </div>
+          <div class="canvas-wrap"><canvas id="chartDstFuture"></canvas></div>
+          <div class="note" id="dstFutureNote">--</div>
+        </article>
+
+        <article class="card span-7">
+          <div class="card-header">
+            <h3>Solar Wind Forecasts</h3>
+            <button class="button" id="swRefreshBtn" type="button">Refresh</button>
+          </div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">ML 24h Speed</div>
+              <div class="metric-value" id="swMlSpeed">--</div>
+              <div class="metric-unit">km/s</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">ML 24h Density</div>
+              <div class="metric-value" id="swMlDensity">--</div>
+              <div class="metric-unit">cm⁻³</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">ML 24h Bz GSM</div>
+              <div class="metric-value" id="swMlBz">--</div>
+              <div class="metric-unit">nT</div>
+            </div>
+          </div>
+          <div class="note">ML timestamp <span id="swMlTime">--</span></div>
+          <div class="stack">
+            <div class="canvas-wrap"><canvas id="chartEnlilSpeed"></canvas></div>
+            <div class="canvas-wrap"><canvas id="chartEnlilDensity"></canvas></div>
+            <div class="canvas-wrap"><canvas id="chartEnlilBz"></canvas></div>
+          </div>
+          <div class="note">WSA-Enlil run <span id="enlilTime">--</span></div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Enlil Speed</div>
+              <div class="metric-value" id="enlilSpeedLast">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Enlil Density</div>
+              <div class="metric-value" id="enlilDensityLast">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Enlil Bz</div>
+              <div class="metric-value" id="enlilBzLast">--</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card span-5">
+          <div class="card-header">
+            <h3>Satellite Drag Planner</h3>
+          </div>
+          <div class="metric-row">
+            <div class="metric">
+              <div class="metric-label">Drag Accel</div>
+              <div class="metric-value" id="dragAccelValue">--</div>
+              <div class="metric-unit" id="dragAccelNote">Density --</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Ballistic Coeff</div>
+              <div class="metric-value" id="dragBallistic">--</div>
+              <div class="metric-unit">kg/m²</div>
+            </div>
+          </div>
+          <div class="input-row">
+            <label for="satPreset">Satellite preset</label>
+            <select id="satPreset"></select>
+          </div>
+          <div class="input-grid">
+            <label>Mass (kg)
+              <input id="satMass" type="number" min="0" step="0.1" />
+            </label>
+            <label>Area (m²)
+              <input id="satArea" type="number" min="0" step="0.001" />
+            </label>
+            <label>Cd
+              <input id="satCd" type="number" min="0.5" step="0.01" />
+            </label>
+            <label>Altitude (km)
+              <input id="satAlt" type="number" min="120" step="1" />
+            </label>
+          </div>
+          <p class="note">Uses DTC proxy + density lookup. Swap to live thermosphere models as needed.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="chart-tooltip" id="chartTooltip" aria-hidden="true"></div>
+  <script src="app.js?v=1"></script>
+</body>
+</html>

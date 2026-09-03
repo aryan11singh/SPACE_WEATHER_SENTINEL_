@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Weather Sentinel</title>
+  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="glow"></div>
+  <main class="shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Real-time Space Weather Monitoring</p>
+        <h1>Space Weather Sentinel</h1>
+        <p class="sub">15‑minute forecast window for geomagnetic storm risk, SYM/H and flare impact signals.</p>
+        <div class="meta-strip">
+          <div class="meta-item">
+            <span class="meta-label">Last update</span>
+            <span id="lastUpdate">--</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Data age</span>
+            <span id="dataAge">--</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Forecast horizon</span>
+            <span>24 h</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-card" id="statusCard">
+        <div class="status-row">
+          <div class="pulse" id="statusPulse"></div>
+          <span id="statusText">Live stream connected</span>
+        </div>
+        <p class="status-note">Solar wind + X-ray ingestion</p>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+          <span class="theme-dot"></span>
+          <span id="themeLabel">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="alert" id="alertPanel">
+      <div class="alert-badge" id="alertBadge">NORMAL</div>
+      <div>
+        <h2 id="alertTitle">Systems nominal</h2>
+        <p id="alertMessage">No immediate geomagnetic storm risk detected. Continue monitoring solar wind and Bz.</p>
+      </div>
+      <div class="alert-meta">
+        <div>
+          <span class="meta-label">Storm risk</span>
+          <strong id="alertStorm">--</strong>
+        </div>
+        <div>
+          <span class="meta-label">SYM/H +15</span>
+          <strong id="alertSymh">--</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card primary">
+        <div class="card-head">
+          <span class="tag">Storm Risk</span>
+          <span class="meta" id="timeStamp">--</span>
+        </div>
+        <div class="gauge" id="stormGauge" style="--risk:0;">
+          <div class="gauge-inner">
+            <div class="value" id="stormValue">--</div>
+            <div class="unit">Probability</div>
+          </div>
+        </div>
+        <div class="bar">
+          <div class="bar-fill" id="stormBar"></div>
+        </div>
+        <p class="note">Threshold: SYM/H ≤ −50 nT within 24 hours.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Kp Index</span>
+          <span class="meta" id="kpTime">--</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="kpValue">--</div>
+          <div class="unit">0–9</div>
+        </div>
+        <div class="bar">
+          <div class="bar-fill" id="kpBar"></div>
+        </div>
+        <p class="note">Planetary K-index from upstream feed (3-hour intervals).</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Dst (SYM/H)</span>
+          <span class="meta">+24 h</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="symhValue">--</div>
+          <div class="unit">nT</div>
+          <span class="trend" id="symhTrend">--</span>
+        </div>
+        <p class="note">SYM/H is used as a Dst proxy for storm intensity.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Flare Risk</span>
+          <span class="meta">M/X Class</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="flareValue">--</div>
+          <div class="unit">Probability</div>
+        </div>
+        <div class="chip-row">
+          <span class="chip" id="flareClass">Class --</span>
+          <span class="chip" id="flareFlux">Flux --</span>
+        </div>
+        <p class="note" id="flareNote">Uses X-ray flare reports for labeling.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">SEP Risk</span>
+          <span class="meta" id="sepTime">--</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="sepLevel">--</div>
+          <div class="unit" id="sepLabel">S-scale</div>
+        </div>
+        <div class="chip-row">
+          <span class="chip" id="sepFlux">-- pfu</span>
+          <span class="chip" id="sepEnergy">--</span>
+        </div>
+        <p class="note" id="sepNote">>10 MeV proton flux feed.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Drag Proxy</span>
+          <span class="meta">+3 hr</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="dragValue">--</div>
+          <div class="unit">DTC</div>
+        </div>
+        <div class="chip-row">
+          <span class="chip" id="dragLevel">--</span>
+          <span class="chip" id="dragNote">JB2008</span>
+        </div>
+        <p class="note">Thermospheric temperature correction proxy.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Satellite Drag</span>
+          <span class="meta">+3 hr</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="dragAccelValue">--</div>
+          <div class="unit">m/s²</div>
+        </div>
+        <div class="chip-row">
+          <span class="chip" id="dragAccelNote">Density --</span>
+          <span class="chip" id="dragBallistic">Bc --</span>
+        </div>
+        <div class="input-row">
+          <label for="satPreset">Satellite</label>
+          <select id="satPreset"></select>
+        </div>
+        <div class="input-grid">
+          <label class="input-label">Mass (kg)
+            <input id="satMass" type="number" min="0" step="0.1" />
+          </label>
+          <label class="input-label">Area (m²)
+            <input id="satArea" type="number" min="0" step="0.001" />
+          </label>
+          <label class="input-label">Cd
+            <input id="satCd" type="number" min="0.5" step="0.01" />
+          </label>
+          <label class="input-label">Altitude (km)
+            <input id="satAlt" type="number" min="120" step="1" />
+          </label>
+        </div>
+        <p class="note">Drag estimate uses DTC proxy + density lookup. Replace with real satellite values.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Satellite Impact</span>
+          <span class="meta">+6 hr</span>
+        </div>
+        <div class="metric">
+          <div class="value" id="satImpactValue">--</div>
+          <div class="unit">Probability</div>
+        </div>
+        <div class="chip-row">
+          <span class="chip" id="satImpactLevel">--</span>
+          <span class="chip" id="satImpactNote">Anomaly model</span>
+        </div>
+        <p class="note">Risk estimated from historical anomaly events.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="tag">Live Solar Wind</span>
+          <span class="meta">Latest minute</span>
+        </div>
+        <div class="triple">
+          <div>
+            <div class="label">Bz (GSM)</div>
+            <div class="mini" id="bzValue">--</div>
+          </div>
+          <div>
+            <div class="label">Speed</div>
+            <div class="mini" id="speedValue">--</div>
+          </div>
+          <div>
+            <div class="label">Density</div>
+            <div class="mini" id="densityValue">--</div>
+          </div>
+        </div>
+        <div class="chip-row">
+          <span class="chip" id="bzBadge">Bz neutral</span>
+          <span class="chip" id="speedBadge">Speed nominal</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="guide-panel">
+      <div>
+        <h2>Satellite Prediction Setup</h2>
+        <p>To calculate satellite drag, select a satellite model from the dropdown (or enter custom mass, area, Cd, and altitude) in the Satellite Drag card.</p>
+      </div>
+      <div class="guide-note">Model selection is required for accurate drag estimates.</div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Recent Conditions</h2>
+          <p>Last 12 hours of SYM/H, Bz and solar wind speed.</p>
+        </div>
+        <button id="refreshBtn">Refresh</button>
+      </div>
+      <div class="chart-grid">
+        <article class="chart-card">
+          <div class="chart-title">
+            <span>SYM/H (nT)</span>
+            <span class="chart-value" id="symLast">--</span>
+          </div>
+          <canvas id="chartSym"></canvas>
+        </article>
+        <article class="chart-card">
+          <div class="chart-title">
+            <span>Bz GSM (nT)</span>
+            <span class="chart-value" id="bzLast">--</span>
+          </div>
+          <canvas id="chartBz"></canvas>
+        </article>
+        <article class="chart-card">
+          <div class="chart-title">
+            <span>Solar wind speed (km/s)</span>
+            <span class="chart-value" id="speedLast">--</span>
+          </div>
+          <canvas id="chartSpeed"></canvas>
+        </article>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>CME / Plasma Cloud Forecasts</h2>
+          <p>Three modes: live event prediction, long-range climatology for 2026–2027, and custom scenario inputs.</p>
+        </div>
+        <button id="cmeRefreshBtn">Refresh</button>
+      </div>
+      <div class="forecast-grid">
+        <article class="forecast-card">
+          <div class="chart-title">
+            <span>Live CME (event-based)</span>
+            <span class="chart-value" id="cmeLiveTime">--</span>
+          </div>
+          <div class="triple">
+            <div>
+              <div class="label">Speed</div>
+              <div class="mini" id="cmeLiveSpeed">--</div>
+            </div>
+            <div>
+              <div class="label">Width</div>
+              <div class="mini" id="cmeLiveWidth">--</div>
+            </div>
+            <div>
+              <div class="label">Impact prob</div>
+              <div class="mini" id="cmeLiveProb">--</div>
+            </div>
+          </div>
+          <p class="note" id="cmeLiveEta">ETA: --</p>
+        </article>
+        <article class="forecast-card">
+          <div class="chart-title">
+            <span>Climatology (2026–2027)</span>
+            <span class="chart-value" id="cmeClimoNote">--</span>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-card">
+              <div class="chart-title">
+                <span>Monthly impact probability</span>
+                <span class="chart-value" id="cmeClimoLast">--</span>
+              </div>
+              <canvas id="chartCmeClimo"></canvas>
+            </article>
+          </div>
+          <p class="note">Long-range risk outlook based on historical CME impacts.</p>
+        </article>
+        <article class="forecast-card">
+          <div class="chart-title">
+            <span>Scenario Predictor</span>
+            <span class="chart-value" id="cmeScenarioProb">--</span>
+          </div>
+          <div class="cme-form">
+            <div class="cme-inputs">
+              <label>
+                <span>Speed (km/s)</span>
+                <input id="cmeSpeedInput" type="number" min="100" max="4000" step="10" placeholder="900" />
+              </label>
+              <label>
+                <span>Width (deg)</span>
+                <input id="cmeWidthInput" type="number" min="20" max="360" step="5" placeholder="120" />
+              </label>
+              <label>
+                <span>Latitude</span>
+                <input id="cmeLatInput" type="number" min="-90" max="90" step="1" placeholder="0" />
+              </label>
+              <label>
+                <span>Longitude</span>
+                <input id="cmeLonInput" type="number" min="-180" max="180" step="1" placeholder="0" />
+              </label>
+            </div>
+            <div class="cme-actions">
+              <label class="cme-toggle">
+                <input id="cmeHaloInput" type="checkbox" />
+                <span>Halo CME</span>
+              </label>
+              <button id="cmeScenarioBtn">Predict</button>
+            </div>
+          </div>
+          <p class="note" id="cmeScenarioEta">ETA: --</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Dst Forecast vs Observed</h2>
+          <p>Overlay of model forecast and observed Dst for the selected period.</p>
+        </div>
+        <div class="chart-actions">
+          <label class="select-label" for="dstRange">Range</label>
+          <select id="dstRange">
+            <option value="24">Last 24h</option>
+            <option value="72">Last 3d</option>
+            <option value="168" selected>Last 7d</option>
+            <option value="336">Last 14d</option>
+            <option value="720">Last 30d</option>
+          </select>
+          <button id="dstRefreshBtn">Update</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="dot real"></span>Observed Dst</span>
+        <span class="legend-item"><span class="dot pred"></span>Calibrated forecast (+1h)</span>
+      </div>
+      <div class="chart-grid">
+        <article class="chart-card">
+          <div class="chart-title">
+            <span>Dst (nT)</span>
+            <span class="chart-value" id="dstLast">--</span>
+          </div>
+          <canvas id="chartDstCompare" class="chart-large"></canvas>
+        </article>
+        <article class="chart-card">
+          <div class="chart-title">
+            <span>Dst forecast (next 72h)</span>
+            <span class="chart-value" id="dstFutureSource">--</span>
+          </div>
+          <canvas id="chartDstFuture" class="chart-large"></canvas>
+          <p class="note" id="dstFutureNote">--</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>30‑Day Geomagnetic Outlook</h2>
+          <p>Recurrence + climatology outlook (Dst min forecast and storm probability).</p>
+        </div>
+        <div class="chart-actions">
+          <span class="chart-value" id="dstOutlookSummary">--</span>
+          <button id="dstOutlookRefreshBtn">Refresh</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="dot pred"></span>Forecast Dst min</span>
+        <span class="legend-item"><span class="dot real"></span>Climatology band (p25–p75)</span>
+      </div>
+      <div class="chart-grid">
+        <article class="chart-card">
+          <div class="chart-title">
+            <span>Dst min (next 30d)</span>
+            <span class="chart-value" id="dstOutlookNote">--</span>
+          </div>
+          <canvas id="chartDstOutlook" class="chart-large"></canvas>
+        </article>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Solar Wind Forecasts</h2>
+          <p>ML 24‑hour forecast plus physics-based WSA‑Enlil 1–4 day outlook.</p>
+        </div>
+        <button id="swRefreshBtn">Refresh</button>
+      </div>
+      <div class="forecast-grid">
+        <article class="forecast-card">
+          <div class="chart-title">
+            <span>ML 24h Forecast</span>
+            <span class="chart-value" id="swMlTime">--</span>
+          </div>
+          <div class="triple">
+            <div>
+              <div class="label">Speed</div>
+              <div class="mini" id="swMlSpeed">--</div>
+            </div>
+            <div>
+              <div class="label">Density</div>
+              <div class="mini" id="swMlDensity">--</div>
+            </div>
+            <div>
+              <div class="label">Bz GSM</div>
+              <div class="mini" id="swMlBz">--</div>
+            </div>
+          </div>
+          <div class="mini-chart-grid">
+            <article class="chart-card compact">
+              <div class="chart-title">
+                <span>Speed (km/s)</span>
+                <span class="chart-value" id="swMlSpeedLast">--</span>
+              </div>
+              <canvas id="chartSwMlSpeed"></canvas>
+            </article>
+            <article class="chart-card compact">
+              <div class="chart-title">
+                <span>Density (cm⁻³)</span>
+                <span class="chart-value" id="swMlDensityLast">--</span>
+              </div>
+              <canvas id="chartSwMlDensity"></canvas>
+            </article>
+            <article class="chart-card compact">
+              <div class="chart-title">
+                <span>Bz GSM (nT)</span>
+                <span class="chart-value" id="swMlBzLast">--</span>
+              </div>
+              <canvas id="chartSwMlBz"></canvas>
+            </article>
+          </div>
+          <p class="note">Daily steps (next 7d) from the +24h ML model.</p>
+        </article>
+        <article class="forecast-card">
+          <div class="chart-title">
+            <span>WSA‑Enlil (1–4 days)</span>
+            <span class="chart-value" id="enlilTime">--</span>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-card">
+              <div class="chart-title">
+                <span>Speed (km/s)</span>
+                <span class="chart-value" id="enlilSpeedLast">--</span>
+              </div>
+              <canvas id="chartEnlilSpeed"></canvas>
+            </article>
+            <article class="chart-card">
+              <div class="chart-title">
+                <span>Density (cm⁻³)</span>
+                <span class="chart-value" id="enlilDensityLast">--</span>
+              </div>
+              <canvas id="chartEnlilDensity"></canvas>
+            </article>
+            <article class="chart-card">
+              <div class="chart-title">
+                <span>Bz GSM (nT)</span>
+                <span class="chart-value" id="enlilBzLast">--</span>
+              </div>
+              <canvas id="chartEnlilBz"></canvas>
+            </article>
+          </div>
+          <p class="note">Physics model forecast from NOAA WSA‑Enlil run.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="aurora-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Aurora Nowcast & Forecast</h2>
+          <p>OVATION auroral oval intensity by hemisphere with ML‑aware risk cues.</p>
+        </div>
+        <div class="aurora-meta">
+          <span id="auroraRisk">ML risk: --</span>
+          <span id="auroraTime">--</span>
+          <button id="refreshAuroraBtn">Refresh</button>
+        </div>
+      </div>
+      <div class="aurora-grid">
+        <article class="aurora-card">
+          <div class="aurora-title">North Nowcast</div>
+          <img id="auroraNorthNowImg" alt="Aurora nowcast north" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" />
+        </article>
+        <article class="aurora-card">
+          <div class="aurora-title">South Nowcast</div>
+          <img id="auroraSouthNowImg" alt="Aurora nowcast south" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.jpg" />
+        </article>
+        <article class="aurora-card">
+          <div class="aurora-title">North Forecast</div>
+          <img id="auroraNorthFcImg" alt="Aurora forecast north" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" />
+        </article>
+        <article class="aurora-card">
+          <div class="aurora-title">South Forecast</div>
+          <img id="auroraSouthFcImg" alt="Aurora forecast south" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.jpg" />
+        </article>
+      </div>
+    </section>
+
+    <section class="alerts-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Alerts, Watches & Warnings</h2>
+          <p>Live space-weather bulletins.</p>
+        </div>
+        <div class="alerts-meta">
+          <span id="alertsCount">--</span>
+          <button id="refreshAlertsBtn">Refresh</button>
+        </div>
+      </div>
+      <div class="alerts-grid" id="alertsGrid"></div>
+    </section>
+
+    <section class="gps-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Space Weather & GPS Systems</h2>
+          <p>Live impact guidance for single/dual‑frequency GNSS positioning.</p>
+        </div>
+        <div class="gps-meta">
+          <span id="gpsRisk">Risk: --</span>
+        </div>
+      </div>
+      <div class="gps-grid">
+        <article class="gps-card">
+          <div class="gps-title">Single‑frequency accuracy</div>
+          <div class="gps-value" id="gpsSingleAcc">--</div>
+          <p class="gps-note">Quiet ionosphere: ~1m. Storms can push errors to tens of meters.</p>
+        </article>
+        <article class="gps-card">
+          <div class="gps-title">Dual‑frequency accuracy</div>
+          <div class="gps-value" id="gpsDualAcc">--</div>
+          <p class="gps-note">Normally centimeters. Severe disturbances can cause loss of lock.</p>
+        </article>
+        <article class="gps-card">
+          <div class="gps-title">Ionospheric TEC impact</div>
+          <div class="gps-value" id="gpsTec">--</div>
+          <p class="gps-note">Geomagnetic storms raise TEC, degrading position models.</p>
+        </article>
+        <article class="gps-card">
+          <div class="gps-title">Scintillation risk</div>
+          <div class="gps-value" id="gpsScint">--</div>
+          <p class="gps-note">Equatorial post‑sunset bubbles can disrupt receiver lock.</p>
+        </article>
+      </div>
+      <div class="gps-footer" id="gpsNote">--</div>
+    </section>
+
+    <section class="satcom-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Satellite Communications</h2>
+          <p>Predicted signal degradation and outage risk based on space weather conditions.</p>
+        </div>
+        <div class="satcom-meta">
+          <span id="satcomRisk">Risk: --</span>
+        </div>
+      </div>
+      <div class="satcom-grid">
+        <article class="satcom-card">
+          <div class="satcom-title">UHF (300 MHz – 3 GHz)</div>
+          <div class="satcom-value" id="satcomUhf">--</div>
+          <p class="satcom-note">More sensitive to ionospheric delay and scintillation.</p>
+        </article>
+        <article class="satcom-card">
+          <div class="satcom-title">SHF (3 – 30 GHz)</div>
+          <div class="satcom-value" id="satcomShf">--</div>
+          <p class="satcom-note">Lower delay but can suffer scintillation/absorption in storms.</p>
+        </article>
+        <article class="satcom-card">
+          <div class="satcom-title">Link Stability</div>
+          <div class="satcom-value" id="satcomStability">--</div>
+          <p class="satcom-note">Risk of fades, phase jitter, and loss of lock.</p>
+        </article>
+        <article class="satcom-card">
+          <div class="satcom-title">Outage Probability (24 h)</div>
+          <div class="satcom-value" id="satcomOutage">--</div>
+          <p class="satcom-note">Estimated from geomagnetic + storm model risk.</p>
+        </article>
+      </div>
+      <div class="satcom-footer" id="satcomNote">--</div>
+    </section>
+
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+      <img id="lightboxImg" alt="Full size view" />
+    </div>
+
+    <section class="gallery-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Solar & Geospace Feeds</h2>
+          <p>Live imagery and diagnostic plots from public feeds.</p>
+        </div>
+        <button id="refreshMediaBtn">Refresh Media</button>
+      </div>
+      <div class="gallery-grid">
+        <article class="gallery-card">
+          <div class="gallery-title">Auroral Oval (North)</div>
+          <img id="imgAurora" alt="Auroral oval forecast" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" />
+        </article>
+        <article class="gallery-card wide">
+          <div class="gallery-title">Solar Wind (ACE)</div>
+          <img id="imgSolarWind" alt="Solar wind plot" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/ace-mag-swepam-2-hour.gif" />
+        </article>
+        <article class="gallery-card wide">
+          <div class="gallery-title">SWX Overview</div>
+          <img id="imgSwx" alt="Space weather overview plot" loading="lazy"
+               src="https://services.swpc.noaa.gov/experimental/images/swx-overview-large.gif" />
+        </article>
+        <article class="gallery-card">
+          <div class="gallery-title">Sunspots (HMI 4500)</div>
+          <img id="imgSunspots" alt="Sunspot regions (HMI continuum)" loading="lazy"
+               src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_4500.jpg" />
+        </article>
+        <article class="gallery-card">
+          <div class="gallery-title">Coronal Holes (AIA 193)</div>
+          <img id="imgCoronal" alt="Coronal holes (AIA 193)" loading="lazy"
+               src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0193.jpg" />
+        </article>
+        <article class="gallery-card">
+          <div class="gallery-title">Solar Flares (AIA 131)</div>
+          <img id="imgFlares" alt="Solar flares (AIA 131)" loading="lazy"
+               src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_0131.jpg" />
+        </article>
+        <article class="gallery-card">
+          <div class="gallery-title">CME (CCOR-1)</div>
+          <img id="imgCcor1" alt="Latest CCOR-1 CME image" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/animations/ccor1/latest.jpg" />
+        </article>
+        <article class="gallery-card wide">
+          <div class="gallery-title">Magnetometer (Boulder)</div>
+          <img id="imgMag" alt="Magnetometer plot" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/boulder-magnetometer.png" />
+        </article>
+        <article class="gallery-card wide">
+          <div class="gallery-title">Geospace Kp/Dst</div>
+          <img id="imgGeospace" alt="Geospace Kp/Dst plot" loading="lazy"
+               src="https://services.swpc.noaa.gov/images/geospace/geospace_1_day.png" />
+        </article>
+        <article class="gallery-card">
+          <div class="gallery-title">Synoptic Map</div>
+          <img id="imgSynoptic" alt="Synoptic solar map" loading="lazy"
+               src="/api/proxy-image?url=https%3A%2F%2Fgong.nso.edu%2Fdata%2Fmagmap%2Fcorona%2Fgong_synoptic_map.jpg" />
+        </article>
+      </div>
+    </section>
+
+    <section class="footer-grid">
+      <div class="footer-head">
+        <div>
+          <h2>Real-Time Panels</h2>
+          <p>Compact monitoring views for quick scanning.</p>
+        </div>
+      </div>
+      <div class="footer-panels">
+        <article class="footer-card">
+          <div class="footer-title">
+            <span>Solar wind speed</span>
+            <span class="footer-value" id="speedFoot">--</span>
+          </div>
+          <canvas id="chartSpeedFoot"></canvas>
+        </article>
+        <article class="footer-card">
+          <div class="footer-title">
+            <span>Bz GSM</span>
+            <span class="footer-value" id="bzFoot">--</span>
+          </div>
+          <canvas id="chartBzFoot"></canvas>
+        </article>
+        <article class="footer-card">
+          <div class="footer-title">
+            <span>SYM/H</span>
+            <span class="footer-value" id="symFoot">--</span>
+          </div>
+          <canvas id="chartSymFoot"></canvas>
+        </article>
+        <article class="footer-card">
+          <div class="footer-title">
+            <span>Kp Index</span>
+            <span class="footer-value" id="kpFoot">--</span>
+          </div>
+          <div class="kp-pill" id="kpPill">--</div>
+          <p class="note">Planetary K-index snapshot.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="details-panel">
+      <div class="chart-head">
+        <div>
+          <h2>Deep Dives</h2>
+          <p>Open full details for satellite risk, Earth impacts, and solar activity.</p>
+        </div>
+      </div>
+      <div class="details-grid">
+        <a class="details-card" href="solar-wind.html">
+          <div class="details-title">Solar Wind & IMF</div>
+          <p>Speed, density, Bz trends, shocks and pressure.</p>
+        </a>
+        <a class="details-card" href="kp-dst.html">
+          <div class="details-title">Kp / Dst / SYM-H</div>
+          <p>Storm intensity and geomagnetic indices.</p>
+        </a>
+        <a class="details-card" href="flares.html">
+          <div class="details-title">Solar Flares</div>
+          <p>X-ray flux + latest flare context.</p>
+        </a>
+        <a class="details-card" href="protons.html">
+          <div class="details-title">Radiation (Protons)</div>
+          <p>Energetic particle environment for satellites.</p>
+        </a>
+        <a class="details-card" href="cme.html">
+          <div class="details-title">CMEs</div>
+          <p>Latest coronagraph imagery and alerts.</p>
+        </a>
+        <a class="details-card" href="aurora.html">
+          <div class="details-title">Auroral Oval</div>
+          <p>Current and forecast auroral activity.</p>
+        </a>
+        <a class="details-card" href="magnetometers.html">
+          <div class="details-title">Magnetometers</div>
+          <p>Ground magnetic field disturbances.</p>
+        </a>
+        <a class="details-card" href="health.html">
+          <div class="details-title">System Health</div>
+          <p>Model artifacts, data feeds, and API uptime.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div id="chartTooltip" class="chart-tooltip" aria-hidden="true"></div>
+
+  <script src="app.js?v=18"></script>
+</body>
+</html>
