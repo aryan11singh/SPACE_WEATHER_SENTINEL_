@@ -2,5 +2,16 @@ data
 logs
 models
 models_sgd
+models_deploy
 __pycache__
 *.pyc
+src/
+scripts/
+tests/
+api/
+requirements.txt
+requirements-ci.txt
+mock_api_server.py
+reports/
+web/
+web_v2/
