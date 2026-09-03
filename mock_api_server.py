@@ -326,8 +326,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    PORT = 8000
-    print(f"Mock API + Web server running at http://localhost:{PORT}")
+    import os
+    PORT = int(os.environ.get("PORT", 8000))
+    print(f"Mock API + Web server running at http://0.0.0.0:{PORT}")
     print("Press Ctrl+C to stop.")
     server = ThreadingHTTPServer(("", PORT), Handler)
     server.serve_forever()
