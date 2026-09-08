@@ -82,7 +82,7 @@ export default function Home() {
               <p className="status-note">Solar wind + X-ray ingestion</p>
               <button className="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
                 <span className="theme-dot"></span>
-                <span id="themeLabel">Dark</span>
+                <span id="themeLabel">Light</span>
               </button>
             </div>
           </header>

@@ -1925,10 +1925,10 @@ bindDstHover();
 function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   localStorage.setItem('theme', mode);
-  if (themeLabel) themeLabel.textContent = mode === 'light' ? 'Light' : 'Dark';
+  if (themeLabel) themeLabel.textContent = mode === 'dark' ? 'Light' : 'Dark';
 }
 
-const savedTheme = localStorage.getItem('theme') || 'light';
+const savedTheme = localStorage.getItem('theme') || 'dark';
 setTheme(savedTheme);
 
 if (themeToggle) {

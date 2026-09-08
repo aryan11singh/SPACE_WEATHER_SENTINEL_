@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dark">
       <body>
         <Script id="api-config" strategy="beforeInteractive">
           {`window.__API_BASE__ = ${JSON.stringify(apiBase)}; window.__API_KEY__ = ${JSON.stringify(apiKey)};`}
